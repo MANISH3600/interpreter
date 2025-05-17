@@ -1,4 +1,4 @@
-this is a  python interpreter  created using django, websockets ,docker ,monaco and javascripts
+this is a  python interpreter  created using django, websockets ,docker ,monaco and javascript
 
 you can check it out at 
 http://ec2-18-119-167-29.us-east-2.compute.amazonaws.com:8000/
