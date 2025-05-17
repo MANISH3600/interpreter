@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Interactive Python Runner with Monaco</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #cfcfcf;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+      height: 100vh;
+      box-sizing: border-box;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+    body.light {
+      background-color: #fff;
+      color: #111;
+    }
+    h1 {
+      margin-bottom: 10px;
+      color: #cfcfcf;
+      text-shadow: 0 0 5px #cfcfcf;
+      transition: color 0.5s ease, text-shadow 0.5s ease;
+    }
+    body.light h1 {
+      color: #111;
+      text-shadow: none;
+    }
+    #editor {
+      width: 80vw;
+      max-width: 800px;
+      height: 300px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 0 10px #cfcfcf;
+      transition: box-shadow 0.5s ease, border-color 0.5s ease;
+    }
+    body.light #editor {
+      border-color: #ccc;
+      box-shadow: 0 0 10px #888;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #cfcfcf;
+      border: none;
+      border-radius: 5px;
+      color: #111;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 10px #cfcfcf;
+    }
+    button:hover {
+      background-color: #aaa;
+      color: white;
+      box-shadow: 0 0 20px #aaa;
+    }
+    body.light button {
+      background-color: #111;
+      color: #cfcfcf;
+      box-shadow: 0 0 10px #444;
+    }
+    body.light button:hover {
+      background-color: #333;
+      color: white;
+      box-shadow: 0 0 20px #333;
+    }
+    #output {
+      margin-top: 15px;
+      width: 80vw;
+      max-width: 800px;
+      background: black;
+      color: #cfcfcf;
+      padding: 15px;
+      height: 200px;
+      overflow-y: auto;
+      border-radius: 5px;
+      box-shadow: inset 0 0 10px #cfcfcf;
+      white-space: pre-wrap;
+      font-size: 14px;
+      user-select: text;
+      font-family: monospace;
+      transition: background-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+    }
+    body.light #output {
+      background: #eee;
+      color: #111;
+      box-shadow: inset 0 0 10px #aaa;
+    }
+    #input {
+      margin-top: 10px;
+      width: 80vw;
+      max-width: 800px;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 16px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      background: #111;
+      color: #cfcfcf;
+      box-shadow: 0 0 5px inset;
+      transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+    }
+    body.light #input {
+      background: #fff;
+      color: #111;
+      border-color: #ccc;
+      box-shadow: 0 0 5px #aaa inset;
+    }
+    #input:disabled {
+      background: #222;
+      color: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    body.light #input:disabled {
+      background: #ddd;
+      color: #999;
+    }
+
+  
+    #theme-toggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      user-select: none;
+      color: inherit;
+      transition: color 0.3s ease;
+      padding: 5px;
+      line-height: 1;
+    }
+    #theme-toggle:hover {
+      color: #f39c12; 
+    }
+  </style>
+
+  <script src="https://unpkg.com/monaco-editor@0.43.0/min/vs/loader.js"></script>
+</head>
+<body>
+  <h1>Python Compiler</h1>
+
+  <div id="editor"></div>
+
+  <button id="run-btn">Run Code</button>
+  <button id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">🌙</button>
+
+  <div id="output" aria-live="polite" aria-label="Code output"></div>
+  <input type="text" id="input" placeholder="Type input here..." disabled aria-disabled="true" />
+
+  <script>
+    require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.43.0/min/vs' }});
+
+    let currentTheme = 'vs-dark'; // default dark
+    let editor;
+
+    require(['vs/editor/editor.main'], function () {
+      editor = monaco.editor.create(document.getElementById('editor'), {
+        value: `print("Hello, world!")`,
+        language: 'python',
+        theme: currentTheme,
+        automaticLayout: true
+      });
+      window.editor = editor;
+    });
+
+
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    function updateToggleIcon() {
+      if (document.body.classList.contains('light')) {
+        themeToggleBtn.textContent = '🌙'; 
+      } else {
+        themeToggleBtn.textContent = '🌞'; 
+      }
+    }
+    themeToggleBtn.addEventListener('click', () => {
+      const body = document.body;
+      if (body.classList.contains('light')) {
+        body.classList.remove('light');
+        currentTheme = 'vs-dark';
+      } else {
+        body.classList.add('light');
+        currentTheme = 'vs';
+      }
+      monaco.editor.setTheme(currentTheme);
+      updateToggleIcon();
+    });
+
+    updateToggleIcon(); 
+    const outputDiv = document.getElementById("output");
+    const inputBox = document.getElementById("input");
+    const runBtn = document.getElementById("run-btn");
+    let socket;
+
+    function appendOutput(text) {
+      outputDiv.textContent += text;
+      outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+
+    runBtn.addEventListener("click", () => {
+      outputDiv.textContent = "";
+      if (socket) {
+        socket.close();
+      }
+
+      let receivedError = false;
+
+socket = new WebSocket(`ws://${window.location.host}/ws/run-code/`);
+
+socket.onopen = () => {
+  const code = editor.getValue();
+  socket.send(JSON.stringify({ action: "start", code }));
+  inputBox.disabled = false;
+  inputBox.setAttribute('aria-disabled', 'false');
+  inputBox.focus();
+  runBtn.disabled = true;
+  receivedError = false;
+};
+
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.action === "output") {
+    appendOutput(data.output);
+  } else if (data.action === "error") {
+    appendOutput(`\n[Error] ${data.message}\n`);
+    console.log("[Error from server]:", data.message);
+    receivedError = true;
+  } else if (data.action === "done") {
+    appendOutput("\n[Execution finished]");
+    inputBox.disabled = true;
+    socket.close(); // this will trigger onclose
+  }
+};
+
+socket.onclose = () => {
+  inputBox.disabled = true;
+  inputBox.setAttribute('aria-disabled', 'true');
+  runBtn.disabled = false;
+
+  if (!receivedError) {
+    appendOutput("\n[Process finished]");
+  } else {
+    appendOutput("\n[Execution stopped]");
+  }
+};
+
+socket.onerror = () => {
+  appendOutput(`\n[Connection error]\n`);
+  inputBox.disabled = true;
+  inputBox.setAttribute('aria-disabled', 'true');
+  runBtn.disabled = false;
+};
+
+    });
+
+    inputBox.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          let userInput = inputBox.value;
+          socket.send(JSON.stringify({ action: "input", input: userInput }));
+          appendOutput(userInput + "\n");
+          inputBox.value = "";
+        }
+      }
+    });
+  </script>
+</body>
+</html>
