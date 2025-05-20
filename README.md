@@ -1,7 +1,5 @@
 this is a  python interpreter  created using django, websockets ,docker ,monaco and javascript
 
-you can check it out at 
-
 
 
 
